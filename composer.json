@@ -1,0 +1,26 @@
+{
+    "name": "kroesen/laravel-additions",
+    "description": "Additions for Laravel applications",
+    "require": {
+        "php": ">=8",
+        "laravel/framework": "^8|^9"
+    },
+    "authors": [
+        {
+            "name": "Alwin Kroesen",
+            "email": "alwinkroesen@hotmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Kroesen\\LaravelAdditions\\Providers\\LaravelAdditionsServiceProvider"
+            ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Kroesen\\LaravelAdditions\\": "src/"
+        }
+    }
+}
