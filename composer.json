@@ -3,7 +3,7 @@
     "description": "Additions for Laravel applications",
     "require": {
         "php": ">=8",
-        "laravel/framework": "^8|^9"
+        "laravel/framework": "^8|^9|^10"
     },
     "authors": [
         {
