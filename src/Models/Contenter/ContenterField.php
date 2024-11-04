@@ -69,8 +69,10 @@ class ContenterField
         return new static('page', $default, true, null);
     }
 
-    public static function buttonFilter(string $name, mixed $default, ?Closure $action = null): static
+    public static function buttonFilter(string $name, array $options, ?Closure $action = null): static
     {
+
+        $default = array_fill_keys($options, true);
 
         if($action === null){
             $action = function($builder, $mustExists, $mustNotExists) use ($name) {
@@ -81,9 +83,17 @@ class ContenterField
             };
         }
 
-
-        $action = function($builder, $values) {
-            dd($values);
+        $action = function($builder, $data) use ($action) {
+            $mustNotExists = [];
+            $mustExists = [];
+            foreach ($data as $key => $bool){
+                if($bool === 'true'){
+                    $mustExists[] = $key;
+                }else{
+                    $mustNotExists[] = $key;
+                }
+            }
+            $action($builder, $mustExists, $mustNotExists);
         };
 
         return new static($name, $default, self::APPLICABLE_NOT_EMPTY, $action);

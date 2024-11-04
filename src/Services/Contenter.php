@@ -61,12 +61,11 @@ class Contenter implements ContenterInterface
         /** @var ContenterField $field */
         foreach ($this->fields as $field){
             $data = $request->post($field->getName(), $field->getDefault());
-
             if ( (
                     is_bool($field->applicable)
                     && $field->applicable
                 ) || (
-                    !is_callable($field->applicable)
+                    is_callable($field->applicable)
                     && call_user_func($field->applicable, $builder, $data)
                 )
             ) {

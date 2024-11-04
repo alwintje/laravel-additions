@@ -165,11 +165,11 @@ global.contenterGlobals = {
     setData: function(data, fields, type){
         fields.each(function(){
             let name = $(this).attr('name');
-            if(typeof name === "undefined"){
+            if(typeof name === "undefined" || name === ''){
                 name = $(this).data('name');
             }
             let value = $(this).val();
-            if(typeof value === "undefined"){
+            if(typeof value === "undefined" || (value === '' && typeof $(this).data('value') !== "undefined")){
                 value = $(this).data('value');
             }
             data[name] = value;
@@ -199,22 +199,30 @@ global.contenterGlobals = {
     },
     registerButtonGroups: function(contenter, groups){
         groups.each(function(){
-            let values = {};
-            $(this).find('.btn').each(function(){
-                values[$(this).data('value')] = $(this).hasClass('btn-success');
+            let buttons = $(this).find('button');
+            let active = $(this).data('active');
+            let inactive = $(this).data('inactive');
+            let values = $(this).data('value');
+            buttons.each(function(){
+                if(values[$(this).data('value')] === 'true'){
+                    $(this).addClass(active);
+                }else{
+                    $(this).addClass(inactive);
+                }
             });
-            $(this).data('value', values);
-            $(this).find('.btn').on('click', function(){
+
+            buttons.on('click', function(){
                 contenter.data.page = 1;
-                let data = $(this).data('value');
+                let value = $(this).data('value');
                 let parent = $(this).parent();
                 let values = parent.data('value');
-                values[data] = !values[data];
-                if(values[data]){
-                    $(this).addClass('btn-success').removeClass('btn-default');
+
+                if(values[value]){
+                    $(this).removeClass(active).addClass(inactive);
                 }else{
-                    $(this).addClass('btn-default').removeClass('btn-success');
+                    $(this).removeClass(inactive).addClass(active);
                 }
+                values[value] = !values[value];
                 parent.data('value', values);
                 clearTimeout(contenter.timer);
                 contenter.timer = setTimeout(function(){
