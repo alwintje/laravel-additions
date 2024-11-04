@@ -204,7 +204,10 @@ global.contenterGlobals = {
             let inactive = $(this).data('inactive');
             let values = $(this).data('value');
             buttons.each(function(){
-                if(values[$(this).data('value')] === 'true'){
+                let value = $(this).data('value');
+                values[value] = values[$(this).data('value')] === true || values[$(this).data('value')] === 'true';
+
+                if(values[value]){
                     $(this).addClass(active);
                 }else{
                     $(this).addClass(inactive);
