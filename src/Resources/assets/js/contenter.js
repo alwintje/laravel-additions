@@ -120,6 +120,9 @@ class Contenter{
         if(typeof this.onSuccess === 'function'){
             this.onSuccess(this, response);
         }
+        if(typeof contenterGlobals.initialize === 'function'){
+            contenterGlobals.initialize(content);
+        }
         if(typeof this.initialize === 'function'){
             this.initialize(content);
         }
