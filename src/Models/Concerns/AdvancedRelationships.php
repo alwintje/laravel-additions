@@ -5,6 +5,8 @@ namespace Kroesen\LaravelAdditions\Models\Concerns;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+use Kroesen\LaravelAdditions\Models\Relations\BelongsTo;
 use Kroesen\LaravelAdditions\Models\Relations\HasMany;
 use Kroesen\LaravelAdditions\Models\Relations\HasManyThroughByMultipleFields;
 use Kroesen\LaravelAdditions\Models\Relations\HasOne;
@@ -110,4 +112,36 @@ trait AdvancedRelationships
         return new HasManyThroughByMultipleFields($query, $farParent, $throughParent, $firstKeys, $foreignKeys, $callback);
     }
 
+    public function belongsTo($related, $foreignKey = null, $ownerKey = null, $relation = null, ?Closure $callback = null): BelongsTo
+    {
+        // If no relation name was given, we will use this debug backtrace to extract
+        // the calling method's name and use that as the relationship name as most
+        // of the time this will be what we desire to use for the relationships.
+        if (is_null($relation)) {
+            $relation = $this->guessBelongsToRelation();
+        }
+
+        $instance = $this->newRelatedInstance($related);
+
+        // If no foreign key was supplied, we can use a backtrace to guess the proper
+        // foreign key name by using the name of the relationship function, which
+        // when combined with an "_id" should conventionally match the columns.
+        if (is_null($foreignKey)) {
+            $foreignKey = Str::snake($relation).'_'.$instance->getKeyName();
+        }
+
+        // Once we have the foreign key names we'll just create a new Eloquent query
+        // for the related models and return the relationship instance which will
+        // actually be responsible for retrieving and hydrating every relation.
+        $ownerKey = $ownerKey ?: $instance->getKeyName();
+
+        return $this->newBelongsTo(
+            $instance->newQuery(), $this, $foreignKey, $ownerKey, $relation, $callback
+        );
+    }
+
+    protected function newBelongsTo(Builder $query, Model $child, $foreignKey, $ownerKey, $relation, ?Closure $callback = null): BelongsTo
+    {
+        return new BelongsTo($query, $child, $foreignKey, $ownerKey, $relation, $callback);
+    }
 }
