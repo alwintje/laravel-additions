@@ -3,8 +3,8 @@ class Contenter{
     constructor(data) {
         this.url = data.url;
         this.data = {};
-        this.data.page = this.getWithDefault(data, 'page', 1);
-        this.data.perPage = this.getWithDefault(data, 'perPage', 25);
+        this.data.page = this.getWithDefault(data, 'page', contenterGlobals.page);
+        this.data.perPage = this.getWithDefault(data, 'perPage', contenterGlobals.perPage);
         this.textFields = this.getWithDefault(data, 'textFields');
         this.selects = this.getWithDefault(data, 'selects');
         this.buttonGroups = this.getWithDefault(data, 'buttonGroups');
@@ -165,6 +165,8 @@ global.contenterGlobals = {
         contenter.element.html(request.responseText);
     },
     timer: 500,
+    perPage: 25,
+    page: 1,
     setData: function(data, fields, type){
         fields.each(function(){
             let name = $(this).attr('name');

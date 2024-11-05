@@ -39,7 +39,7 @@ class Contenter implements ContenterInterface
             }
             if($listData === null){
                 $data = app(EncryptCookies::class)->decryptEncryptedCookie($cookieName, $cookie);
-                $listData = json_decode($data);
+                $listData = json_decode($data, true);
             }
             $data = \Request::get('list-data', $listData) ?? [];
         }catch (\Throwable){
