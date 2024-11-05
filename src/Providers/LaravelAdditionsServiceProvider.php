@@ -4,6 +4,7 @@ namespace Kroesen\LaravelAdditions\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Kroesen\LaravelAdditions\Middleware\EncryptCookies;
 use Kroesen\LaravelAdditions\Services\Contenter;
 
 class LaravelAdditionsServiceProvider extends ServiceProvider
@@ -13,6 +14,7 @@ class LaravelAdditionsServiceProvider extends ServiceProvider
     {
         parent::register();
         $this->app->bind('contenter' , Contenter::class);
+        $this->app->bind(EncryptCookies::class , EncryptCookies::class);
     }
 
     public function boot()

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cookie;
+use Kroesen\LaravelAdditions\Middleware\EncryptCookies;
 use Kroesen\LaravelAdditions\Models\Contenter\ContenterField;
 
 class Contenter implements ContenterInterface
@@ -37,7 +38,8 @@ class Contenter implements ContenterInterface
                 $listData = null;
             }
             if($listData === null){
-                $listData = json_decode(decrypt($cookie));
+                $data = app(EncryptCookies::class)->decryptEncryptedCookie($cookieName, $cookie);
+                $listData = json_decode($data);
             }
             $data = \Request::get('list-data', $listData) ?? [];
         }catch (\Throwable){
@@ -128,6 +130,17 @@ class Contenter implements ContenterInterface
     private function saveData()
     {
         // Store for 2 weeks
-        Cookie::queue($this->cookieName, json_encode($this->listData), 60*24*14);
+        //$name, $value, $minutes = 0, $path = null, $domain = null, $secure = null, $httpOnly = true, $raw = false, $sameSite = null
+        Cookie::queue(
+            $this->cookieName, // name
+            json_encode($this->listData), // value
+            60*24*14, // minutes
+            null, // path
+            null, // domain
+            null, // secure
+            true, // httpOnly
+            true, // raw
+            null  // sameSite
+        );
     }
 }
