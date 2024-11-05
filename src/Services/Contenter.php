@@ -28,7 +28,22 @@ class Contenter implements ContenterInterface
         $self = new static();
         $self->cookieName = $cookieName;
         $self->fields = $fields;
-        $self->listData = \Request::get('list-data', json_decode(Cookie::get($cookieName, '{}'), true));
+
+        $cookie = Cookie::get($cookieName, '{}');
+        try{
+            try {
+                $listData = json_decode($cookie, true);
+            }catch (\Throwable){
+                $listData = null;
+            }
+            if($listData === null){
+                $listData = json_decode(decrypt($cookie));
+            }
+            $data = \Request::get('list-data', $listData) ?? [];
+        }catch (\Throwable){
+            $data = [];
+        }
+        $self->listData = $data;
 
         /** @var ContenterField $field */
         foreach ($fields as $field){
