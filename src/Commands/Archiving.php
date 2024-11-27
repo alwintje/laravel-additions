@@ -3,7 +3,6 @@
 namespace Kroesen\LaravelAdditions\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
@@ -93,7 +92,8 @@ class Archiving extends Command
                 $chunkSize = $options['chunk_size'] ?? 1000;
                 $this->log('Chunk size: ' .  $chunkSize);
                 $this->log('Identifier: ' .  $options['identifier']);
-                $query->chunk($chunkSize, function(Collection $results) use ($model, $options, $hasTranslations) {
+                $query->limit($chunkSize);
+                while(($results = $query->get())->isNotEmpty()){
 
 
                     $inserts = [];
@@ -167,7 +167,7 @@ class Archiving extends Command
                     }
                     $this->log('Old data removed');
 
-                });
+                }
 
             }
 
