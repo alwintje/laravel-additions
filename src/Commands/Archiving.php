@@ -92,6 +92,7 @@ class Archiving extends Command
                 $this->log('Translations: ' .  ($hasTranslations ? 'yes' : 'no'));
                 $chunkSize = $options['chunk_size'] ?? 1000;
                 $this->log('Chunk size: ' .  $chunkSize);
+                $this->log('Identifier: ' .  $options['identifier']);
                 $query->chunk($chunkSize, function(Collection $results) use ($model, $options, $hasTranslations) {
 
 
