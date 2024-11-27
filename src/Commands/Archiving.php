@@ -200,6 +200,6 @@ class Archiving extends Command
         }
         $this->info($msg);
 
-        \Storage::disk($this->logDisk)->append($this->currentModel.'/'.$this->today.'txt', $msg);
+        \Storage::disk($this->logDisk)->append($this->currentModel.'/'.$this->today.'.txt', $msg);
     }
 }
