@@ -19,4 +19,6 @@ return [
 //            'archive_model' => \App\Models\Archived\ArchivedProduct::class,
 //        ],
     ],
+
+    'log_disk' => 'archive_logs',
 ];
