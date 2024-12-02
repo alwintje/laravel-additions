@@ -125,7 +125,7 @@ class UpdateArchivedTables extends Command
                     $addIndexes['indexes'],
 //                    $addForeignKeys
                 );
-
+                $alterTables = array_unique($alterTables);
             }
 
             foreach ($alterTables as $alterTable){
@@ -138,8 +138,13 @@ class UpdateArchivedTables extends Command
     {
         foreach ($columns as $k => $column){
             $string = '`' . $column['name'] . '` ' . $column['type'];
+            if(isset($column['collation'])){
+                $string .= ' collate ' . $column['collation'];
+            }
             if(isset($column['nullable']) && $column['nullable']){
                 $string .= ' NULL';
+            }else{
+                $string .= ' NOT NULL';
             }
             if(isset($column['auto_increment']) && $column['auto_increment']){
                 $string .= ' auto_increment';
