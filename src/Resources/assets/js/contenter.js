@@ -88,7 +88,7 @@ class Contenter{
         content.html(response);
 
         let t = this;
-        content.find('#per-page-select').on('change', function(){
+        content.find('.contenter-per-page-select').on('change', function(){
             t.data.perPage = $(this).val();
             t.data.page = 1;
             t.update();
