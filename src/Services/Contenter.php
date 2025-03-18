@@ -29,23 +29,7 @@ class Contenter implements ContenterInterface
         $self = new static();
         $self->cookieName = $cookieName;
         $self->fields = $fields;
-
-        $cookie = Cookie::get($cookieName, '{}');
-        try{
-            try {
-                $listData = json_decode($cookie, true);
-            }catch (\Throwable){
-                $listData = null;
-            }
-            if($listData === null){
-                $data = app(EncryptCookies::class)->decryptEncryptedCookie($cookieName, $cookie);
-                $listData = json_decode($data, true);
-            }
-            $data = \Request::get('list-data', $listData) ?? [];
-        }catch (\Throwable){
-            $data = [];
-        }
-        $self->listData = $data;
+        $self->listData = $self->getCookieData($cookieName);
 
         /** @var ContenterField $field */
         foreach ($fields as $field){
@@ -62,6 +46,24 @@ class Contenter implements ContenterInterface
         return $self;
     }
 
+    public function getCookieData(string $cookieName): array
+    {
+        $cookie = Cookie::get($cookieName, '{}');
+        try{
+            try {
+                $listData = json_decode($cookie, true);
+            }catch (\Throwable){
+                $listData = null;
+            }
+            if($listData === null){
+                $data = app(EncryptCookies::class)->decryptEncryptedCookie($cookieName, $cookie);
+                $listData = json_decode($data, true);
+            }
+            return \Request::get('list-data', $listData) ?? [];
+        }catch (\Throwable){
+            return [];
+        }
+    }
 
     public function getOrDefault(string $name, mixed $default)
     {
@@ -116,6 +118,7 @@ class Contenter implements ContenterInterface
     public function response(View $view): Response
     {
         $data = $this->listData;
+        config(['app.list_data' => $this->listData]);
         if($this->builder !== null){
             $data['results'] = $this->builder->paginate($this->listData['perPage']);
             $data['results']->setPath('#');

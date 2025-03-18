@@ -12,6 +12,8 @@ interface ContenterInterface
 
     public static function create(string $cookieName, array $fields, array $defaultSorting): static;
 
+    public function getCookieData(string $cookieName): array;
+
     public function getOrDefault(string $name, mixed $default);
 
     public function getViewData(array $extra);
