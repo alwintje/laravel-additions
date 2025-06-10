@@ -14,11 +14,17 @@ interface ContenterInterface
 
     public function getCookieData(string $cookieName): array;
 
-    public function getOrDefault(string $name, mixed $default);
+    public function getOrDefault(string $name, mixed $default): mixed;
 
-    public function getViewData(array $extra);
+    public function getViewData(array $extra): array;
 
-    public function handleRequest(Builder $builder, Request $request);
+    public function handleRequest(Builder $builder, Request $request): void;
+
+    public function setBuilder(Builder $builder): void;
+
+    public function applyFiltersToQuery(Builder $builder): void;
+
+    public function applySortingToQuery(Builder $builder): void;
 
     public function response(View $view): Response;
 }
