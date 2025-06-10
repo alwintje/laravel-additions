@@ -18,6 +18,7 @@ class Contenter implements ContenterInterface
     protected array $listData = [];
     protected array $defaultSorting = [];
     protected array $rawSorting = [];
+    protected array $multipleSorting = [];
     protected null|Builder $builder = null;
     protected null|Collection $results = null;
 
@@ -40,6 +41,10 @@ class Contenter implements ContenterInterface
         if(isset($defaultSorting['raw'])){
             $self->rawSorting = $defaultSorting['raw'];
             unset($defaultSorting['raw']);
+        }
+        if(isset($defaultSorting['multiple'])){
+            $self->multipleSorting = $defaultSorting['multiple'];
+            unset($defaultSorting['multiple']);
         }
         $self->defaultSorting = $defaultSorting;
 
@@ -106,7 +111,31 @@ class Contenter implements ContenterInterface
             $sorting = $this->defaultSorting;
         }
         $this->listData['sorting'] = $sorting;
-        if(isset($this->rawSorting[$sorting['field']])){
+
+        if(isset($this->multipleSorting[$sorting['field']])){
+            foreach ($this->multipleSorting[$sorting['field']] as $key => $value){
+                $field = $value;
+                $reverse = false;
+                if(is_bool($value)){
+                    $field = $key;
+                    $reverse = $value;
+                }
+
+                $direction = $sorting['direction'];
+                if($reverse){
+                    if(strtolower($direction) === 'desc'){
+                        $direction = 'asc';
+                    }else{
+                        $direction = 'desc';
+                    }
+                }
+                if(isset($this->rawSorting[$field])){
+                    $builder->orderByRaw($this->rawSorting[$field].' '.$direction);
+                }else{
+                    $builder->orderBy($field, $direction);
+                }
+            }
+        }elseif(isset($this->rawSorting[$sorting['field']])){
             $builder->orderByRaw($this->rawSorting[$sorting['field']].' '.$sorting['direction']);
         }else{
             $builder->orderBy($sorting['field'], $sorting['direction']);
