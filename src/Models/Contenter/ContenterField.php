@@ -55,7 +55,7 @@ class ContenterField
         return new static(
             $name,
             '',
-            self::APPLICABLE_TEXT,
+            true,
             fn ($query, $search) => $action($query, $search === null ? null : trim($search)),
         );
     }
