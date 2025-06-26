@@ -85,19 +85,20 @@ class Contenter implements ContenterInterface
         /** @var ContenterField $field */
         foreach ($this->fields as $field){
             $data = $request->post($field->getName(), $field->getDefault());
-            if ( (
-                    is_bool($field->applicable)
-                    && $field->applicable
-                ) || (
-                    is_callable($field->applicable)
-                    && call_user_func($field->applicable, $builder, $data)
-                )
-            ) {
-                if(is_callable($field->action)){
-                    call_user_func($field->action, $builder, $data);
+            $doAction = false;
+            if(!$field->isApplicable($builder, $data)){
+                $default = $field->getDefault();
+                if($data !== $default && $field->isApplicable($builder, $default)){
+                    $doAction = true;
                 }
-                $this->listData[$field->getName()] = $data;
+                $data = $default;
+            }else{
+                $doAction = true;
             }
+            if($doAction && is_callable($field->action)){
+                call_user_func($field->action, $builder, $data);
+            }
+            $this->listData[$field->getName()] = $data;
         }
         $sorting = $request->post('sorting', $this->listData['sorting'] ?? $this->defaultSorting);
         try{

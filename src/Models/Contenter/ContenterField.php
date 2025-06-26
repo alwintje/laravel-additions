@@ -55,7 +55,7 @@ class ContenterField
         return new static(
             $name,
             '',
-            true,
+            self::APPLICABLE_TEXT,
             fn ($query, $search) => $action($query, $search === null ? null : trim($search)),
         );
     }
@@ -72,7 +72,14 @@ class ContenterField
     public static function buttonFilter(string $name, array $options, ?Closure $action = null): static
     {
 
-        $default = array_fill_keys($options, true);
+        $default = [];
+        foreach ($options as $option => $enabled){
+            if(is_bool($enabled)){
+                $default[$option] = $enabled;
+            }else{
+                $default[$enabled] = true;
+            }
+        }
 
         if($action === null){
             $action = function($builder, $mustExists, $mustNotExists) use ($name) {
@@ -113,5 +120,17 @@ class ContenterField
     public function getDefault(): mixed
     {
         return $this->default;
+    }
+
+    public function isApplicable($builder, $data): bool
+    {
+        return (
+                is_bool($this->applicable)
+                && $this->applicable
+            ) || (
+                is_callable($this->applicable)
+                && call_user_func($this->applicable, $builder, $data)
+            )
+        ;
     }
 }
