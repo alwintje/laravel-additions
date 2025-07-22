@@ -82,24 +82,7 @@ class Contenter implements ContenterInterface
 
     public function handleRequest(Builder $builder, Request $request): void
     {
-        /** @var ContenterField $field */
-        foreach ($this->fields as $field){
-            $data = $request->post($field->getName(), $field->getDefault());
-            $doAction = false;
-            if(!$field->isApplicable($builder, $data)){
-                $default = $field->getDefault();
-                if($data !== $default && $field->isApplicable($builder, $default)){
-                    $doAction = true;
-                }
-                $data = $default;
-            }else{
-                $doAction = true;
-            }
-            if($doAction && is_callable($field->action)){
-                call_user_func($field->action, $builder, $data);
-            }
-            $this->listData[$field->getName()] = $data;
-        }
+        // First sorting, then filters so the filters can manipulate sorting
         $sorting = $request->post('sorting', $this->listData['sorting'] ?? $this->defaultSorting);
         try{
             if(!is_array($sorting)){
@@ -131,15 +114,43 @@ class Contenter implements ContenterInterface
                     }
                 }
                 if(isset($this->rawSorting[$field])){
-                    $builder->orderByRaw($this->rawSorting[$field].' '.$direction);
+                    if(is_string($this->rawSorting[$field])){
+                        $builder->orderByRaw($this->rawSorting[$field].' '.$direction);
+                    }else{
+                        $builder->orderBy($this->rawSorting[$field], $direction);
+                    }
                 }else{
                     $builder->orderBy($field, $direction);
                 }
             }
         }elseif(isset($this->rawSorting[$sorting['field']])){
-            $builder->orderByRaw($this->rawSorting[$sorting['field']].' '.$sorting['direction']);
+            if(is_string($this->rawSorting[$sorting['field']])){
+                $builder->orderByRaw($this->rawSorting[$sorting['field']].' '.$sorting['direction']);
+            }else{
+                $builder->orderBy($this->rawSorting[$sorting['field']], $sorting['direction']);
+            }
         }else{
             $builder->orderBy($sorting['field'], $sorting['direction']);
+        }
+
+        // Filters
+        /** @var ContenterField $field */
+        foreach ($this->fields as $field){
+            $data = $request->post($field->getName(), $field->getDefault());
+            $doAction = false;
+            if(!$field->isApplicable($builder, $data)){
+                $default = $field->getDefault();
+                if($data !== $default && $field->isApplicable($builder, $default)){
+                    $doAction = true;
+                }
+                $data = $default;
+            }else{
+                $doAction = true;
+            }
+            if($doAction && is_callable($field->action)){
+                call_user_func($field->action, $builder, $data);
+            }
+            $this->listData[$field->getName()] = $data;
         }
 
         $this->builder = $builder;
@@ -185,7 +196,11 @@ class Contenter implements ContenterInterface
             $sorting = $this->defaultSorting;
         }
         if(isset($this->rawSorting[$sorting['field']])){
-            $builder->orderByRaw($this->rawSorting[$sorting['field']].' '.$sorting['direction']);
+            if(is_string($this->rawSorting[$sorting['field']])){
+                $builder->orderByRaw($this->rawSorting[$sorting['field']].' '.$sorting['direction']);
+            }else{
+                $builder->orderBy($this->rawSorting[$sorting['field']], $sorting['direction']);
+            }
         }else{
             $builder->orderBy($sorting['field'], $sorting['direction']);
         }
