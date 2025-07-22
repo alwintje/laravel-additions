@@ -40,6 +40,11 @@ class Contenter implements ContenterInterface
         }
         if(isset($defaultSorting['raw'])){
             $self->rawSorting = $defaultSorting['raw'];
+            foreach ($self->rawSorting as $k => $value) {
+                if ($value instanceof \Illuminate\Contracts\Database\Query\Builder) {
+                    $self->rawSorting[$k] = "({$value->toRawSql()})";
+                }
+            }
             unset($defaultSorting['raw']);
         }
         if(isset($defaultSorting['multiple'])){
@@ -114,21 +119,13 @@ class Contenter implements ContenterInterface
                     }
                 }
                 if(isset($this->rawSorting[$field])){
-                    if(is_string($this->rawSorting[$field])){
-                        $builder->orderByRaw($this->rawSorting[$field].' '.$direction);
-                    }else{
-                        $builder->orderBy($this->rawSorting[$field], $direction);
-                    }
+                    $builder->orderByRaw($this->rawSorting[$field].' '.$direction);
                 }else{
                     $builder->orderBy($field, $direction);
                 }
             }
         }elseif(isset($this->rawSorting[$sorting['field']])){
-            if(is_string($this->rawSorting[$sorting['field']])){
-                $builder->orderByRaw($this->rawSorting[$sorting['field']].' '.$sorting['direction']);
-            }else{
-                $builder->orderBy($this->rawSorting[$sorting['field']], $sorting['direction']);
-            }
+            $builder->orderByRaw($this->rawSorting[$sorting['field']].' '.$sorting['direction']);
         }else{
             $builder->orderBy($sorting['field'], $sorting['direction']);
         }
@@ -196,11 +193,7 @@ class Contenter implements ContenterInterface
             $sorting = $this->defaultSorting;
         }
         if(isset($this->rawSorting[$sorting['field']])){
-            if(is_string($this->rawSorting[$sorting['field']])){
-                $builder->orderByRaw($this->rawSorting[$sorting['field']].' '.$sorting['direction']);
-            }else{
-                $builder->orderBy($this->rawSorting[$sorting['field']], $sorting['direction']);
-            }
+            $builder->orderByRaw($this->rawSorting[$sorting['field']].' '.$sorting['direction']);
         }else{
             $builder->orderBy($sorting['field'], $sorting['direction']);
         }
