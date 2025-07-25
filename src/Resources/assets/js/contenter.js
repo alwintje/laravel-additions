@@ -14,6 +14,7 @@ class Contenter{
         this.onSuccess = this.getWithDefault(data, 'onSuccess');
         this.initialize = this.getWithDefault(data, 'initialize');
         this.onError = this.getWithDefault(data, 'onError');
+        this.contenterAdditions = typeof ContenterAdditions !== 'undefined' ? new ContenterAdditions(this, data) : null;
         this.ajaxNumber = 0;
         this.timer = null;
 
@@ -57,6 +58,10 @@ class Contenter{
         if (typeof this.onUpdateList === "function") {
             data = this.onUpdateList(data);
         }
+        if(this.contenterAdditions && typeof this.contenterAdditions.update !== "undefined"){
+            data = this.contenterAdditions.update(data);
+        }
+
         this.addLoader();
         let t = this;
         $.ajax({
@@ -117,6 +122,10 @@ class Contenter{
             return false;
         });
 
+        if(this.contenterAdditions && typeof this.contenterAdditions.handleResult !== "undefined"){
+            this.contenterAdditions.handleResult(content, status, ajaxNumber);
+        }
+
         if(typeof this.onSuccess === 'function'){
             this.onSuccess(this, response);
         }
@@ -135,6 +144,11 @@ class Contenter{
             this.onError(this, request, status, error)
             return;
         }
+
+        if(this.contenterAdditions && typeof this.contenterAdditions.handleError !== "undefined"){
+            this.contenterAdditions.handleError(request, status, error);
+        }
+
         contenterGlobals.onError(this, request, status, error);
     }
 
@@ -194,6 +208,14 @@ global.contenterGlobals = {
                 contenterGlobals.registerButtonGroups(contenter, fields);
                 return;
         }
+
+        if(this.contenterAdditions && typeof this.contenterAdditions.registerFields !== "undefined"){
+            listener = this.contenterAdditions.registerFields(contenter, listener, fields, type);
+            if(listener === 'return'){
+                return;
+            }
+        }
+
         fields.on(listener, function(){
             contenter.addLoader();
             clearTimeout(contenter.timer);
