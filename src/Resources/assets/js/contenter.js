@@ -209,8 +209,8 @@ global.contenterGlobals = {
                 return;
         }
 
-        if(this.contenterAdditions && typeof this.contenterAdditions.registerFields !== "undefined"){
-            listener = this.contenterAdditions.registerFields(contenter, listener, fields, type);
+        if(contenter.contenterAdditions && typeof contenter.contenterAdditions.registerFields !== "undefined"){
+            listener = contenter.contenterAdditions.registerFields(listener, fields, type);
             if(listener === 'return'){
                 return;
             }

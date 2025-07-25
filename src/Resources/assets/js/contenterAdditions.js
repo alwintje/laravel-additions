@@ -25,9 +25,9 @@ class ContenterAdditions {
         console.log('Addition handleError', request, status, error);
     }
 
-    registerFields(contenter, listener, fields, type){
+    registerFields(listener, fields, type){
         // Do something when registering fields (add field type or something)
-        console.log('Addition registerFields', contenter, listener, fields, type);
+        console.log('Addition registerFields', listener, fields, type);
     }
 }
 
