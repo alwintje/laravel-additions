@@ -24,7 +24,7 @@ interface ContenterInterface
 
     public function applyFiltersToQuery(Builder $builder, array $fieldData = [], bool $save = false): void;
 
-    public function applySortingToQuery(Builder $builder, ?array $sorting = null, bool $save = false): void;
+    public function applySortingToQuery(Builder $builder, null|array|string $sorting = null, bool $save = false): void;
 
     public function response(View $view): Response;
 }

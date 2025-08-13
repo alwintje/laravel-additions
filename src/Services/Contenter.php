@@ -131,7 +131,7 @@ class Contenter implements ContenterInterface
         }
     }
 
-    public function applySortingToQuery(Builder $builder, ?array $sorting = null, bool $save = false): void
+    public function applySortingToQuery(Builder $builder, null|array|string $sorting = null, bool $save = false): void
     {
         $sorting = $sorting ?? $this->listData['sorting'] ?? $this->defaultSorting;
         try{
