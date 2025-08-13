@@ -89,6 +89,51 @@ class Contenter implements ContenterInterface
     {
         // First sorting, then filters so the filters can manipulate sorting
         $sorting = $request->post('sorting', $this->listData['sorting'] ?? $this->defaultSorting);
+        $this->applySortingToQuery($builder, $sorting, true);
+
+        $fieldData = [];
+        foreach ($this->fields as $field){
+            $fieldData[$field->getName()] = $request->post($field->getName(), $field->getDefault());
+        }
+
+        $this->applyFiltersToQuery($builder, $fieldData, true);
+
+        $this->builder = $builder;
+    }
+
+    public function setBuilder(Builder $builder): void
+    {
+        $this->builder = $builder;
+    }
+
+    public function applyFiltersToQuery(Builder $builder, array $fieldData = [], bool $save = false): void
+    {
+        /** @var ContenterField $field */
+        foreach ($this->fields as $field){
+            $data = $fieldData[$field->getName()] ?? $this->listData[$field->getName()] ?? $field->getDefault();
+            $doAction = false;
+            if(!$field->isApplicable($builder, $data)){
+                $default = $field->getDefault();
+                if($data !== $default && $field->isApplicable($builder, $default)){
+                    $doAction = true;
+                }
+                $data = $default;
+            }else{
+                $doAction = true;
+            }
+
+            if($doAction && is_callable($field->action)){
+                call_user_func($field->action, $builder, $data);
+            }
+            if($save){
+                $this->listData[$field->getName()] = $data;
+            }
+        }
+    }
+
+    public function applySortingToQuery(Builder $builder, ?array $sorting = null, bool $save = false): void
+    {
+        $sorting = $sorting ?? $this->listData['sorting'] ?? $this->defaultSorting;
         try{
             if(!is_array($sorting)){
                 $sorting = json_decode($sorting, true);
@@ -99,7 +144,9 @@ class Contenter implements ContenterInterface
         if (!isset($sorting['field']) || !isset($sorting['direction'])) {
             $sorting = $this->defaultSorting;
         }
-        $this->listData['sorting'] = $sorting;
+        if($save){
+            $this->listData['sorting'] = $sorting;
+        }
 
         if(isset($this->multipleSorting[$sorting['field']])){
             foreach ($this->multipleSorting[$sorting['field']] as $key => $value){
@@ -125,74 +172,6 @@ class Contenter implements ContenterInterface
                 }
             }
         }elseif(isset($this->rawSorting[$sorting['field']])){
-            $builder->orderByRaw($this->rawSorting[$sorting['field']].' '.$sorting['direction']);
-        }else{
-            $builder->orderBy($sorting['field'], $sorting['direction']);
-        }
-
-        // Filters
-        /** @var ContenterField $field */
-        foreach ($this->fields as $field){
-            $data = $request->post($field->getName(), $field->getDefault());
-            $doAction = false;
-            if(!$field->isApplicable($builder, $data)){
-                $default = $field->getDefault();
-                if($data !== $default && $field->isApplicable($builder, $default)){
-                    $doAction = true;
-                }
-                $data = $default;
-            }else{
-                $doAction = true;
-            }
-            if($doAction && is_callable($field->action)){
-                call_user_func($field->action, $builder, $data);
-            }
-            $this->listData[$field->getName()] = $data;
-        }
-
-        $this->builder = $builder;
-    }
-
-    public function setBuilder(Builder $builder): void
-    {
-        $this->builder = $builder;
-    }
-
-    public function applyFiltersToQuery(Builder $builder): void
-    {
-        /** @var ContenterField $field */
-        foreach ($this->fields as $field){
-            $data = $this->listData[$field->getName()] ?? $field->getDefault();
-
-            if ( (
-                    is_bool($field->applicable)
-                    && $field->applicable
-                ) || (
-                    is_callable($field->applicable)
-                    && call_user_func($field->applicable, $builder, $data)
-                )
-            ) {
-                if(is_callable($field->action)){
-                    call_user_func($field->action, $builder, $data);
-                }
-            }
-        }
-    }
-
-    public function applySortingToQuery(Builder $builder, ?array $sorting = null): void
-    {
-        $sorting = $sorting ?? $this->listData['sorting'] ?? $this->defaultSorting;
-        try{
-            if(!is_array($sorting)){
-                $sorting = json_decode($sorting, true);
-            }
-        } catch (\Exception $e) {
-            $sorting = $this->defaultSorting;
-        }
-        if (!isset($sorting['field']) || !isset($sorting['direction'])) {
-            $sorting = $this->defaultSorting;
-        }
-        if(isset($this->rawSorting[$sorting['field']])){
             $builder->orderByRaw($this->rawSorting[$sorting['field']].' '.$sorting['direction']);
         }else{
             $builder->orderBy($sorting['field'], $sorting['direction']);
