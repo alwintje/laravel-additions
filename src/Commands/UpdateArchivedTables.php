@@ -21,7 +21,7 @@ class UpdateArchivedTables extends Command
 
     public function handle()
     {
-        $this->info('Get models');
+        $this->info('Update archive tables');
 
         $models = config('laravel_additions.models');
 
@@ -129,6 +129,7 @@ class UpdateArchivedTables extends Command
             }
 
             foreach ($alterTables as $alterTable){
+                $this->info($alterTable);
                 \DB::connection($archiveObject->getConnectionName())->statement($alterTable);
             }
         }
