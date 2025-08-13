@@ -179,9 +179,9 @@ class Contenter implements ContenterInterface
         }
     }
 
-    public function applySortingToQuery(Builder $builder): void
+    public function applySortingToQuery(Builder $builder, string $sorting = null): void
     {
-        $sorting = $this->listData['sorting'] ?? $this->defaultSorting;
+        $sorting = $sorting ?? $this->listData['sorting'] ?? $this->defaultSorting;
         try{
             if(!is_array($sorting)){
                 $sorting = json_decode($sorting, true);
