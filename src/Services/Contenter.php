@@ -166,13 +166,13 @@ class Contenter implements ContenterInterface
                     }
                 }
                 if(isset($this->rawSorting[$field])){
-                    $builder->orderByRaw($this->rawSorting[$field].' '.$direction);
+                    $builder->orderByRaw($this->formatRawSorting($this->rawSorting[$field], $direction));
                 }else{
                     $builder->orderBy($field, $direction);
                 }
             }
         }elseif(isset($this->rawSorting[$sorting['field']])){
-            $builder->orderByRaw($this->rawSorting[$sorting['field']].' '.$sorting['direction']);
+            $builder->orderByRaw($this->formatRawSorting($this->rawSorting[$sorting['field']], $sorting['direction']));
         }else{
             $builder->orderBy($sorting['field'], $sorting['direction']);
         }
@@ -191,6 +191,20 @@ class Contenter implements ContenterInterface
         $response->header('Ajax-Number', \Request::header('Ajax-Number'));
         $this->saveData();
         return $response;
+    }
+
+    public function formatRawSorting(string $sort, string $direction): string
+    {
+        if($direction !== 'asc'){
+            // Change min, max, greatest and least to opposite
+            $sort = str_replace(['min(','MIN('], 'placeholder_min(', $sort);
+            $sort = str_replace(['max(', 'MAX('], 'MIN(', $sort);
+            $sort = str_replace('placeholder_min(', 'MAX(', $sort);
+            $sort = str_replace(['greatest(', 'GREATEST('], 'placeholder_greatest(', $sort);
+            $sort = str_replace(['least(', 'LEAST('], 'GREATEST(', $sort);
+            $sort = str_replace('placeholder_greatest(', 'LEAST(', $sort);
+        }
+        return $sort . ' ' . $direction;
     }
 
     private function saveData()

@@ -27,4 +27,6 @@ interface ContenterInterface
     public function applySortingToQuery(Builder $builder, null|array|string $sorting = null, bool $save = false): void;
 
     public function response(View $view): Response;
+
+    public function formatRawSorting(string $sort, string $direction): string;
 }
