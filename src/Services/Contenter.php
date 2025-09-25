@@ -187,6 +187,9 @@ class Contenter implements ContenterInterface
             $data['results']->setPath('#');
         }
         $data = array_merge($data, $view->getData());
+        foreach ($data as $key => $value){
+            $data[\Str::camel($key)] = $value;
+        }
         $response = \Response::make($view->with($data));
         $response->header('Ajax-Number', \Request::header('Ajax-Number'));
         $this->saveData();
