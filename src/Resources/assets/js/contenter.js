@@ -175,7 +175,9 @@ class Contenter{
 global.contenterGlobals = {
     loaderHTML: '<i class="fa fa-spin fa-spinner fa-3x"></i>',
     onError: function(contenter, request, status, error){
-        console.log(request);
+        if(request.status === 419 && request.responseText.includes('CSRF token mismatch')){
+            window.location.href = window.location.href;
+        }
         contenter.element.html(request.responseText);
     },
     timer: 500,
