@@ -8,6 +8,7 @@ class Contenter{
         this.textFields = this.getWithDefault(data, 'textFields');
         this.selects = this.getWithDefault(data, 'selects');
         this.buttonGroups = this.getWithDefault(data, 'buttonGroups');
+        this.checkboxes = this.getWithDefault(data, 'checkboxes');
         this.customFields = this.getWithDefault(data, 'customFields');
         this.element = this.getWithDefault(data, 'element');
         this.onUpdateList = this.getWithDefault(data, 'onUpdateList');
@@ -31,6 +32,9 @@ class Contenter{
         if(null !== this.buttonGroups){
             contenterGlobals.registerFields(this, this.buttonGroups, 'btn-group');
         }
+        if(null !== this.checkboxes){
+            contenterGlobals.registerFields(this, this.checkboxes, 'checkbox');
+        }
         if(null !== this.customFields){
             contenterGlobals.registerFields(this, this.customFields, 'custom')
         }
@@ -50,6 +54,9 @@ class Contenter{
         }
         if(null !== this.buttonGroups){
             data = contenterGlobals.setData(data, this.buttonGroups, 'btn-group');
+        }
+        if(null !== this.checkboxes){
+            data = contenterGlobals.setData(data, this.checkboxes, 'checkbox');
         }
         if(null !== this.customFields) {
             data = contenterGlobals.setData(data, this.customFields, 'custom');
@@ -193,6 +200,12 @@ global.contenterGlobals = {
             if(typeof value === "undefined" || (value === '' && typeof $(this).data('value') !== "undefined")){
                 value = $(this).data('value');
             }
+            if(type === 'checkbox'){
+                if(''+$(this).data('value') === '0'){
+                    delete data[name];
+                    return;
+                }
+            }
             data[name] = value;
         });
         return data;
@@ -206,6 +219,9 @@ global.contenterGlobals = {
             case 'select':
                 listener = 'change';
                 break;
+            case 'checkbox':
+                contenterGlobals.registerCheckboxes(contenter, fields);
+                return;
             case 'btn-group':
                 contenterGlobals.registerButtonGroups(contenter, fields);
                 return;
@@ -261,6 +277,26 @@ global.contenterGlobals = {
                     contenter.update();
                 }, contenterGlobals.timer);
             });
+        });
+    },
+    registerCheckboxes: function(contenter, checkboxes){
+        checkboxes.on('change', function(){
+            if($(this).is(':checked')){
+                $(this).data('value', 1);
+            }else{
+                $(this).data('value', 0);
+            }
+            clearTimeout(contenter.timer);
+            contenter.timer = setTimeout(function(){
+                contenter.update();
+            }, contenterGlobals.timer);
+        });
+        checkboxes.each(function(){
+            if($(this).is(':checked')){
+                $(this).data('value', 1);
+            }else{
+                $(this).data('value', 0);
+            }
         });
     }
 }
