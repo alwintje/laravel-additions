@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Kroesen\LaravelAdditions\Models\Relations\BelongsTo;
 use Kroesen\LaravelAdditions\Models\Relations\HasMany;
+use Kroesen\LaravelAdditions\Models\Relations\HasManyBySplit;
 use Kroesen\LaravelAdditions\Models\Relations\HasManyThroughByMultipleFields;
 use Kroesen\LaravelAdditions\Models\Relations\HasOne;
 use Kroesen\LaravelAdditions\Models\Relations\HasOneByMultipleFields;
@@ -143,5 +144,30 @@ trait AdvancedRelationships
     protected function newBelongsTo(Builder $query, Model $child, $foreignKey, $ownerKey, $relation, ?Closure $callback = null): BelongsTo
     {
         return new BelongsTo($query, $child, $foreignKey, $ownerKey, $relation, $callback);
+    }
+
+    /**
+     * Define a many-to-many relationship based on 2 tables.
+     * Local table contains list of id's
+     *
+     * @param string $related
+     * @param string $foreignKey
+     * @param string $localKey
+     * @param string $delimiter
+     * @param Closure|null $callback
+     * @return HasManyBySplit
+     */
+    public function newSplitRelation(string $related, string $localKey, string $foreignKey, string $delimiter = '|', ?Closure $callback = null): HasManyBySplit
+    {
+        $instance = $this->newRelatedInstance($related);
+
+        return new HasManyBySplit(
+            $instance->newQuery(),
+            $this,
+            $instance->getTable().'.'.$foreignKey,
+            $localKey,
+            $delimiter,
+            $callback
+        );
     }
 }
