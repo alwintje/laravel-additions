@@ -2,7 +2,6 @@
 
 namespace Kroesen\LaravelAdditions\Models\Relations;
 
-use App\Models\Relations\HasMany;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,9 +16,9 @@ class HasManyBySplit extends HasMany
         string $foreignKey,
         string $localKey,
         protected string $delimiter = '|',
-        private readonly ?Closure $callback = null
+        ?Closure $callback = null
     ) {
-        parent::__construct($query, $parent, $foreignKey, $localKey, $this->callback);
+        parent::__construct($query, $parent, $foreignKey, $localKey, $callback);
     }
 
     public function addConstraints()
@@ -30,6 +29,8 @@ class HasManyBySplit extends HasMany
             if(!empty($this->getParentKey())){
                 $query->whereIn($this->foreignKey, $this->getParentKey());
                 $query->orderByRaw(sprintf('FIELD(%s, %s)', $this->foreignKey, implode(',', $this->getParentKey())));
+            }else{
+                $query->whereRaw('1 = 2');
             }
 
             $query->whereNotNull($this->foreignKey);
@@ -65,7 +66,7 @@ class HasManyBySplit extends HasMany
 
     public function getParentKey()
     {
-        return explode($this->delimiter, parent::getParentKey());
+        return array_filter(explode($this->delimiter, parent::getParentKey()));
     }
 
     /**
@@ -101,19 +102,5 @@ class HasManyBySplit extends HasMany
 
         return $models;
     }
-
-    /**
-     * Get the results of the relationship.
-     *
-     * @return array|Collection
-     */
-    public function getResults(): array|Collection
-    {
-        if($this->callback instanceof Closure){
-            ($this->callback)($this->query);
-        }
-        return parent::getResults();
-    }
-
 
 }
