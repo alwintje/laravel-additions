@@ -71,10 +71,8 @@ trait MultipleFieldsRelationships
 
     public function hasManyByMultipleFields($related, array $keys, ?Closure $callback = null): HasManyByMultipleFields
     {
-        $instance = $this->newInstance($related);
-
         return $this->newHasManyByMultipleFields(
-            $instance->newQuery(),
+            $this->newRelatedInstance($related)->newQuery(),
             $this,
             $keys,
             $callback,
