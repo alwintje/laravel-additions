@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Str;
 use Kroesen\LaravelAdditions\Middleware\EncryptCookies;
 use Kroesen\LaravelAdditions\Models\Contenter\ContenterField;
 
@@ -188,7 +189,7 @@ class Contenter implements ContenterInterface
         }
         $data = array_merge($data, $view->getData());
         foreach ($data as $key => $value){
-            $data[\Str::camel($key)] = $value;
+            $data[Str::camel($key)] = $value;
         }
         $response = \Response::make($view->with($data));
         $response->header('Ajax-Number', \Request::header('Ajax-Number'));
