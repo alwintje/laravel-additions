@@ -1,0 +1,29 @@
+<?php
+
+namespace Kroesen\LaravelAdditions\Models\Concerns;
+
+use Kroesen\LaravelAdditions\Models\Relations\HasManyMerged;
+
+trait HasManyMergedRelationship
+{
+
+    /**
+     * @param  class-string  $related
+     * @param  string[]|null  $foreignKeys
+     * @param  string|null  $localKey
+     * @return HasManyMerged
+     */
+    public function hasManyMerged(string $related, ?array $foreignKeys = null, ?string $localKey = null): HasManyMerged
+    {
+        $instance = new $related();
+
+        $localKey = $localKey ?: $this->getKeyName();
+
+        $foreignKeys = array_map(function ($foreignKey) use ($instance) {
+            return $instance->getTable() . '.' . $foreignKey;
+        }, $foreignKeys);
+
+        return new HasManyMerged($instance->newQuery(), $this, $foreignKeys, $localKey);
+    }
+
+}

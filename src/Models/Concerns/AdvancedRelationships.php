@@ -9,13 +9,11 @@ use Illuminate\Support\Str;
 use Kroesen\LaravelAdditions\Models\Relations\BelongsTo;
 use Kroesen\LaravelAdditions\Models\Relations\HasMany;
 use Kroesen\LaravelAdditions\Models\Relations\HasManyBySplit;
-use Kroesen\LaravelAdditions\Models\Relations\HasManyThroughByMultipleFields;
 use Kroesen\LaravelAdditions\Models\Relations\HasOne;
-use Kroesen\LaravelAdditions\Models\Relations\HasOneByMultipleFields;
-use Kroesen\LaravelAdditions\Models\Relations\HasOneThroughByMultipleFields;
 
 trait AdvancedRelationships
 {
+    use MultipleFieldsRelationships, HasManyMergedRelationship;
 
     public function hasMany($related, $foreignKey = null, $localKey = null, ?Closure $callback = null): HasMany
     {
@@ -55,62 +53,6 @@ trait AdvancedRelationships
     protected function newHasOne(Builder $query, Model $parent, $foreignKey, $localKey, ?Closure $callback = null): HasOne
     {
         return new HasOne($query, $parent, $foreignKey, $localKey, $callback);
-    }
-
-    public function hasOneByMultipleFields($related, array $keys = null, ?Closure $callback = null): HasOneByMultipleFields
-    {
-        $instance = $this->newRelatedInstance($related);
-
-        return $this->newHasOneByMultipleFields(
-            $instance->newQuery(),
-            $this,
-            $keys,
-            $instance->getTable(),
-            $callback
-        );
-    }
-
-    protected function newHasOneByMultipleFields(Builder $query, Model $parent, array $keys, string $foreignTable, ?Closure $callback = null): HasOneByMultipleFields
-    {
-        return new HasOneByMultipleFields($query, $parent, $keys, $foreignTable, $callback);
-    }
-
-    public function hasOneThroughByMultipleFields($related, $through, array $firstKeys, array $foreignKeys, ?Closure $callback = null): HasOneThroughByMultipleFields
-    {
-        $through = $this->newRelatedThroughInstance($through);
-
-        return $this->newHasOneThroughByMultipleFields(
-            $this->newRelatedInstance($related)->newQuery(),
-            $this,
-            $through,
-            $firstKeys,
-            $foreignKeys,
-            $callback,
-        );
-    }
-
-    protected function newHasOneThroughByMultipleFields(Builder $query, Model $farParent, Model $throughParent, array $firstKeys, array $foreignKeys, ?Closure $callback = null): HasOneThroughByMultipleFields
-    {
-        return new HasOneThroughByMultipleFields($query, $farParent, $throughParent, $firstKeys, $foreignKeys, $callback);
-    }
-
-    public function hasManyThroughByMultipleFields($related, $through, array $firstKeys, array $foreignKeys, ?Closure $callback = null): HasManyThroughByMultipleFields
-    {
-        $through = $this->newRelatedThroughInstance($through);
-
-        return $this->newHasManyThroughByMultipleFields(
-            $this->newRelatedInstance($related)->newQuery(),
-            $this,
-            $through,
-            $firstKeys,
-            $foreignKeys,
-            $callback,
-        );
-    }
-
-    protected function newHasManyThroughByMultipleFields(Builder $query, Model $farParent, Model $throughParent, array $firstKeys, array $foreignKeys, ?Closure $callback = null): HasManyThroughByMultipleFields
-    {
-        return new HasManyThroughByMultipleFields($query, $farParent, $throughParent, $firstKeys, $foreignKeys, $callback);
     }
 
     public function belongsTo($related, $foreignKey = null, $ownerKey = null, $relation = null, ?Closure $callback = null): BelongsTo
