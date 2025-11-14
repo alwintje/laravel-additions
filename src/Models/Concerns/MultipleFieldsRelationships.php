@@ -5,6 +5,7 @@ namespace Kroesen\LaravelAdditions\Models\Concerns;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Kroesen\LaravelAdditions\Models\Relations\HasManyByMultipleFields;
 use Kroesen\LaravelAdditions\Models\Relations\HasManyThroughByMultipleFields;
 use Kroesen\LaravelAdditions\Models\Relations\HasOneByMultipleFields;
 use Kroesen\LaravelAdditions\Models\Relations\HasOneThroughByMultipleFields;
@@ -66,6 +67,23 @@ trait MultipleFieldsRelationships
     protected function newHasManyThroughByMultipleFields(Builder $query, Model $farParent, Model $throughParent, array $firstKeys, array $foreignKeys, ?Closure $callback = null): HasManyThroughByMultipleFields
     {
         return new HasManyThroughByMultipleFields($query, $farParent, $throughParent, $firstKeys, $foreignKeys, $callback);
+    }
+
+    public function hasManyByMultipleFields($related, array $keys, ?Closure $callback = null): HasManyByMultipleFields
+    {
+        $instance = $this->newInstance($related);
+
+        return $this->newHasManyByMultipleFields(
+            $instance->newQuery(),
+            $this,
+            $keys,
+            $callback,
+        );
+    }
+
+    protected function newHasManyByMultipleFields(Builder $query, Model $parent, array $keys, ?Closure $callback = null): HasManyByMultipleFields
+    {
+        return new HasManyByMultipleFields($query, $parent, $keys, $callback);
     }
 
 }
