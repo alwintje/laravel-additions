@@ -54,7 +54,7 @@ class HasManyBySplit extends HasMany
     {
         $keys = [];
         foreach ($models as $model) {
-            foreach (explode($this->delimiter, $key ? $model->getAttribute($key) : $model->getKey()) as $value){
+            foreach ($this->getArray($key ? $model->getAttribute($key) : $model->getKey()) as $value){
                 if(!empty($value)){
                     $keys[$value] = $value;
                 }
@@ -66,7 +66,7 @@ class HasManyBySplit extends HasMany
 
     public function getParentKey()
     {
-        return array_filter(explode($this->delimiter, parent::getParentKey()));
+        return array_filter($this->getArray(parent::getParentKey()));
     }
 
     /**
@@ -88,7 +88,7 @@ class HasManyBySplit extends HasMany
         foreach ($models as $model) {
 
             $data = [];
-            foreach (explode('|', $model->getAttribute($this->localKey)) as $id){
+            foreach ($this->getArray($model->getAttribute($this->localKey)) as $id){
                 if(isset($dictionary[$id])){
                     $data = array_merge($data, $dictionary[$id]);
                 }
@@ -101,6 +101,14 @@ class HasManyBySplit extends HasMany
         }
 
         return $models;
+    }
+
+    private function getArray($data): array
+    {
+        if(is_array($data)){
+            return $data;
+        }
+        return explode($this->delimiter, $data);
     }
 
 }
