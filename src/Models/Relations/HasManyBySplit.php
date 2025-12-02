@@ -111,4 +111,12 @@ class HasManyBySplit extends HasMany
         return explode($this->delimiter, $data);
     }
 
+    public function add(Model $object): static
+    {
+        $data = $this->getParentKey();
+        $data[] = $object->getAttribute($this->getForeignKeyName());
+        $this->getParent()->setAttribute($this->getLocalKeyName(), $data);
+        return $this;
+    }
+
 }
