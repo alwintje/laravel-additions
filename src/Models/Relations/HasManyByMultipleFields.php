@@ -24,11 +24,12 @@ class HasManyByMultipleFields extends Relation
     {
         if (static::$constraints) {
             $keys = $this->keys;
-
             $this->query->where(function ($query) use ($keys): void {
                 foreach ($keys as $foreignKey => $localKey) {
                     $query->orWhere(function ($query) use ($localKey, $foreignKey): void {
-                        $query->where($foreignKey, '=', $localKey)
+                        $key = $this->parent?->getAttribute($localKey);
+                        $query
+                            ->where($foreignKey, '=', $key)
                             ->whereNotNull($foreignKey);
                     });
                 }
