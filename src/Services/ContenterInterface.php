@@ -10,9 +10,9 @@ use Illuminate\Http\Response;
 interface ContenterInterface
 {
 
-    public static function create(string $cookieName, array $fields, array $defaultSorting): static;
+    public static function create(string $listKey, array $fields, array $defaultSorting): static;
 
-    public function getCookieData(string $cookieName): array;
+    public function getListData(string $keyName): array;
 
     public function getOrDefault(string $name, mixed $default): mixed;
 

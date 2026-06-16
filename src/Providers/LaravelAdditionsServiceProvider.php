@@ -30,5 +30,9 @@ class LaravelAdditionsServiceProvider extends ServiceProvider
     {
         Blade::componentNamespace('Kroesen\\LaravelAdditions\\Views', 'laravel-additions');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'laravel-additions');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->publishes([
+            __DIR__.'/../database/migrations' => database_path('migrations'),
+        ], 'laravel-additions-migrations');
     }
 }

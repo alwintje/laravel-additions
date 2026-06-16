@@ -21,4 +21,6 @@ return [
     ],
 
     'log_disk' => 'archive_logs',
+
+    'cookie_key' => 'contenter-list-data',
 ];

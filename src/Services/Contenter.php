@@ -7,14 +7,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
-use Kroesen\LaravelAdditions\Middleware\EncryptCookies;
 use Kroesen\LaravelAdditions\Models\Contenter\ContenterField;
+use Kroesen\LaravelAdditions\Models\ContenterListData;
 
 class Contenter implements ContenterInterface
 {
-    protected string $cookieName;
+    protected string $listKey;
     protected array $fields;
     protected array $listData = [];
     protected array $defaultSorting = [];
@@ -24,14 +23,14 @@ class Contenter implements ContenterInterface
     protected null|Collection $results = null;
 
     public static function create(
-        string $cookieName,
+        string $listKey,
         array  $fields,
         array  $defaultSorting,
     ): static {
         $self = new static();
-        $self->cookieName = $cookieName;
+        $self->listKey = $listKey;
         $self->fields = $fields;
-        $self->listData = $self->getCookieData($cookieName);
+        $self->listData = $self->getListData($listKey);
 
         /** @var ContenterField $field */
         foreach ($fields as $field){
@@ -57,23 +56,9 @@ class Contenter implements ContenterInterface
         return $self;
     }
 
-    public function getCookieData(string $cookieName): array
+    public function getListData(string $keyName): array
     {
-        $cookie = Cookie::get($cookieName, '{}');
-        try{
-            try {
-                $listData = json_decode($cookie, true);
-            }catch (\Throwable){
-                $listData = null;
-            }
-            if($listData === null){
-                $data = app(EncryptCookies::class)->decryptEncryptedCookie($cookieName, $cookie);
-                $listData = json_decode($data, true);
-            }
-            return \Request::get('list-data', $listData) ?? [];
-        }catch (\Throwable){
-            return [];
-        }
+        return \Request::get('list-data', ContenterListData::getListData($keyName)) ?? [];
     }
 
     public function getOrDefault(string $name, mixed $default): mixed
@@ -193,7 +178,7 @@ class Contenter implements ContenterInterface
         }
         $response = \Response::make($view->with($data));
         $response->header('Ajax-Number', \Request::header('Ajax-Number'));
-        $this->saveData();
+        ContenterListData::saveListData($this->listKey, $this->listData);
         return $response;
     }
 
@@ -209,22 +194,5 @@ class Contenter implements ContenterInterface
             $sort = str_replace('placeholder_greatest(', 'LEAST(', $sort);
         }
         return $sort . ' ' . $direction;
-    }
-
-    private function saveData()
-    {
-        // Store for 2 weeks
-        //$name, $value, $minutes = 0, $path = null, $domain = null, $secure = null, $httpOnly = true, $raw = false, $sameSite = null
-        Cookie::queue(
-            $this->cookieName, // name
-            json_encode($this->listData), // value
-            60*24*14, // minutes
-            null, // path
-            null, // domain
-            null, // secure
-            true, // httpOnly
-            true, // raw
-            null  // sameSite
-        );
     }
 }
