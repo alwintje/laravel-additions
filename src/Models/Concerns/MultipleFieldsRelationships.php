@@ -13,7 +13,7 @@ use Kroesen\LaravelAdditions\Models\Relations\HasOneThroughByMultipleFields;
 trait MultipleFieldsRelationships
 {
 
-    public function hasOneByMultipleFields($related, array $keys = null, ?Closure $callback = null): HasOneByMultipleFields
+    public function hasOneByMultipleFields($related, ?array $keys = null, ?Closure $callback = null): HasOneByMultipleFields
     {
         $instance = $this->newRelatedInstance($related);
 
