@@ -8,12 +8,12 @@ use Kroesen\LaravelAdditions\Models\ArchiveBuilder;
 trait ArchivedModel
 {
 
-    public function scopeWithArchive(Builder $builder): ArchiveBuilder
+    public function scopeWithArchive(Builder $builder): Builder
     {
         return ArchiveBuilder::createFromBuilder($builder);
     }
 
-    public function scopeOnlyArchive(Builder $builder): ArchiveBuilder
+    public function scopeOnlyArchive(Builder $builder): Builder
     {
         $archiveModel = new (config('laravel_additions.models.'.$builder->getModel()::class.'.archive_model'));
         $builder->setModel($archiveModel);
