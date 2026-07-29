@@ -9,6 +9,7 @@ class Contenter{
         this.selects = this.getWithDefault(data, 'selects');
         this.buttonGroups = this.getWithDefault(data, 'buttonGroups');
         this.checkboxes = this.getWithDefault(data, 'checkboxes');
+        this.singleButtonGroups = this.getWithDefault(data, 'singleButtonGroups');
         this.customFields = this.getWithDefault(data, 'customFields');
         this.element = this.getWithDefault(data, 'element');
         this.onUpdateList = this.getWithDefault(data, 'onUpdateList');
@@ -32,6 +33,9 @@ class Contenter{
         if(null !== this.buttonGroups){
             contenterGlobals.registerFields(this, this.buttonGroups, 'btn-group');
         }
+        if(null !== this.singleButtonGroups){
+            contenterGlobals.registerFields(this, this.singleButtonGroups, 'single-btn-group');
+        }
         if(null !== this.checkboxes){
             contenterGlobals.registerFields(this, this.checkboxes, 'checkbox');
         }
@@ -54,6 +58,9 @@ class Contenter{
         }
         if(null !== this.buttonGroups){
             data = contenterGlobals.setData(data, this.buttonGroups, 'btn-group');
+        }
+        if(null !== this.singleButtonGroups){
+            data = contenterGlobals.setData(data, this.singleButtonGroups, 'single-btn-group');
         }
         if(null !== this.checkboxes){
             data = contenterGlobals.setData(data, this.checkboxes, 'checkbox');
@@ -225,6 +232,9 @@ global.contenterGlobals = {
             case 'btn-group':
                 contenterGlobals.registerButtonGroups(contenter, fields);
                 return;
+            case 'single-btn-group':
+                contenterGlobals.registerSingleButtonGroups(contenter, fields);
+                return;
         }
 
         if(contenter.contenterAdditions && typeof contenter.contenterAdditions.registerFields !== "undefined"){
@@ -272,6 +282,45 @@ global.contenterGlobals = {
                 }
                 values[value] = !values[value];
                 parent.data('value', values);
+                clearTimeout(contenter.timer);
+                contenter.timer = setTimeout(function(){
+                    contenter.update();
+                }, contenterGlobals.timer);
+            });
+        });
+    },
+    registerSingleButtonGroups: function(contenter, groups){
+        groups.each(function(){
+            let buttons = $(this).find('button');
+            let value = $(this).data('value');
+            buttons.each(function(){
+                let btnValue = $(this).data('value');
+
+                if(value === btnValue){
+                    $(this).css({
+                        display: ''
+                    });
+                }else{
+                    $(this).css({
+                        display: 'none'
+                    });
+                }
+            });
+
+            buttons.on('click', function(){
+                contenter.data.page = 1;
+
+                let next = $(this).next();
+                if(next.length === 0){
+                    next = $(buttons[0]);
+                }
+                $(this).css({
+                    display: 'none'
+                });
+                next.css({
+                    display: ''
+                });
+                $(this).parent().data('value', next.data('value'));
                 clearTimeout(contenter.timer);
                 contenter.timer = setTimeout(function(){
                     contenter.update();

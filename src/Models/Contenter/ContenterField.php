@@ -112,6 +112,16 @@ class ContenterField
         return new static($name, $default, self::APPLICABLE_NOT_EMPTY, $action);
     }
 
+    public static function singleButtonFilter(string $name, mixed $default, ?Closure $action = null): static
+    {
+        if ($action === null) {
+            $action = function ($builder, $value) use ($name) {
+                $builder->where($name, $value);
+            };
+        }
+        return new static($name, $default, self::APPLICABLE_NOT_EMPTY, $action);
+    }
+
     /**
      * @return string
      */
