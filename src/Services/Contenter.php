@@ -25,7 +25,7 @@ class Contenter implements ContenterInterface
     public static function create(
         string $listKey,
         array  $fields,
-        array  $defaultSorting,
+        array  $sorting,
     ): static {
         $self = new static();
         $self->listKey = $listKey;
@@ -38,27 +38,27 @@ class Contenter implements ContenterInterface
                 $self->listData[$field->getName()] = $field->getDefault();
             }
         }
-        if(isset($defaultSorting['raw'])){
-            $self->rawSorting = $defaultSorting['raw'];
+        if(isset($sorting['raw'])){
+            $self->rawSorting = $sorting['raw'];
             foreach ($self->rawSorting as $k => $value) {
                 if ($value instanceof \Illuminate\Contracts\Database\Query\Builder) {
                     $self->rawSorting[$k] = "({$value->toRawSql()})";
                 }
             }
-            unset($defaultSorting['raw']);
+            unset($sorting['raw']);
         }
-        if(isset($defaultSorting['multiple'])){
-            $self->multipleSorting = $defaultSorting['multiple'];
-            unset($defaultSorting['multiple']);
+        if(isset($sorting['multiple'])){
+            $self->multipleSorting = $sorting['multiple'];
+            unset($sorting['multiple']);
         }
-        $self->defaultSorting = $defaultSorting;
+        $self->defaultSorting = $sorting;
 
         return $self;
     }
 
     public function getListData(string $keyName): array
     {
-        return \Request::get('list-data', ContenterListData::getListData($keyName)) ?? [];
+        return \Request::input('list-data', ContenterListData::getListData($keyName)) ?? [];
     }
 
     public function getOrDefault(string $name, mixed $default): mixed

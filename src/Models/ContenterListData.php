@@ -84,7 +84,6 @@ class ContenterListData extends Model
             return static::$contenterCache[$cacheKey];
         }
 
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return static::$contenterCache[$cacheKey] = ContenterListData::query()
             ->where('cookie', $contenterKey)
             ->where('key', $key)
