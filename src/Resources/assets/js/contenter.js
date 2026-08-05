@@ -2,21 +2,30 @@ class Contenter{
 
     constructor(data) {
         this.url = data.url;
+        this.statisticsBtn = this.getWithDefault(data, 'statisticsBtn', contenterGlobals.statisticsBtn);
+        this.statisticsUrl = this.getWithDefault(data, 'statisticsUrl');
+        this.statisticsActive = false;
+
         this.data = {};
         this.data.page = this.getWithDefault(data, 'page', contenterGlobals.page);
         this.data.perPage = this.getWithDefault(data, 'perPage', contenterGlobals.perPage);
+
         this.textFields = this.getWithDefault(data, 'textFields');
         this.selects = this.getWithDefault(data, 'selects');
         this.buttonGroups = this.getWithDefault(data, 'buttonGroups');
         this.checkboxes = this.getWithDefault(data, 'checkboxes');
         this.singleButtonGroups = this.getWithDefault(data, 'singleButtonGroups');
         this.customFields = this.getWithDefault(data, 'customFields');
+
         this.element = this.getWithDefault(data, 'element');
+
         this.onUpdateList = this.getWithDefault(data, 'onUpdateList');
         this.onSuccess = this.getWithDefault(data, 'onSuccess');
         this.initialize = this.getWithDefault(data, 'initialize');
         this.onError = this.getWithDefault(data, 'onError');
+
         this.contenterAdditions = typeof ContenterAdditions !== 'undefined' ? new ContenterAdditions(this, data) : null;
+
         this.ajaxNumber = 0;
         this.timer = null;
 
@@ -47,6 +56,11 @@ class Contenter{
     }
 
     update(){
+        let url = this.url;
+        if(this.statisticsActive === true){
+            url = this.statisticsUrl;
+        }
+
         this.ajaxNumber++;
         let data = this.data;
 
@@ -80,7 +94,7 @@ class Contenter{
         let t = this;
         $.ajax({
             method: 'post',
-            url: this.url,
+            url: url,
             data: data,
             headers: {
                 'Ajax-Number': this.ajaxNumber,
@@ -105,6 +119,17 @@ class Contenter{
         }
         let content = this.element;
         content.html(response);
+
+        if(null !== this.statisticsUrl){
+            let btn = $(this.statisticsBtn);
+            content.find('.statistics-btn-container').append(btn);
+            btn.on('click', function(){
+                t.statisticsActive = true;
+                t.update();
+            });
+        }else{
+            content.find('.statistics-btn-container').remove();
+        }
 
         let t = this;
         content.find('.contenter-per-page-select').on('change', function(){
@@ -188,6 +213,7 @@ class Contenter{
 
 global.contenterGlobals = {
     loaderHTML: '<i class="fa fa-spin fa-spinner fa-3x"></i>',
+    statisticsBtn: '<button class="btn btn-sm btn-warning">Statistieken</button>',
     onError: function(contenter, request, status, error){
         if(request.status === 419 && request.responseText.includes('CSRF token mismatch')){
             window.location.href = window.location.href;

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
+use Kroesen\LaravelAdditions\Models\Chart\ChartInterface;
 use Kroesen\LaravelAdditions\Models\Contenter\ContenterField;
 use Kroesen\LaravelAdditions\Models\ContenterListData;
 
@@ -20,6 +21,8 @@ class Contenter implements ContenterInterface
     protected array $rawSorting = [];
     protected array $multipleSorting = [];
     protected null|Builder $builder = null;
+    /** @var null|array|ChartInterface[]  */
+    protected null|array $charts = null;
     protected null|Collection $results = null;
 
     public static function create(
@@ -90,6 +93,29 @@ class Contenter implements ContenterInterface
     public function setBuilder(Builder $builder): void
     {
         $this->builder = $builder;
+    }
+
+    public function setCharts(null|array $charts = []): void
+    {
+        $this->charts = $charts;
+    }
+
+    public function addChart(ChartInterface $chart): void
+    {
+        if($this->charts === null){
+            $this->charts = [];
+        }
+        $this->charts[] = $chart;
+    }
+
+    public function hasCharts(): bool
+    {
+        return !empty($this->charts);
+    }
+
+    public function isStatistics(): bool
+    {
+        return $this->charts !== null;
     }
 
     public function applyFiltersToQuery(Builder $builder, array $fieldData = [], bool $save = false): void
@@ -169,8 +195,20 @@ class Contenter implements ContenterInterface
         $data = $this->listData;
         config(['app.list_data' => $this->listData]);
         if($this->builder !== null){
-            $data['results'] = $this->builder->paginate($this->listData['perPage']);
-            $data['results']->setPath('#');
+            if($this->isStatistics()){
+                if(!$this->hasCharts()){
+                    $data['results'] = $this->builder->get();
+                }else{
+                    $results = [];
+                    foreach ($this->charts as $chart){
+                        $results[] = $chart->build($this->builder);
+                    }
+                    $data['results'] = $results;
+                }
+            }else{
+                $data['results'] = $this->builder->paginate($this->listData['perPage']);
+                $data['results']->setPath('#');
+            }
         }
         $data = array_merge($data, $view->getData());
         foreach ($data as $key => $value){

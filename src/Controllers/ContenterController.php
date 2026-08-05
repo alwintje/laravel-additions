@@ -22,15 +22,22 @@ trait ContenterController
 
     abstract protected function getQuery(Request $request): Builder;
 
-    protected function index(): Response
+    public function index(): Response
     {
         return $this->contenter()->response($this->resolveView('index'));
     }
 
-    protected function content(Request $request): Response
+    public function content(Request $request): Response
     {
         $this->contenter()->handleRequest($this->getQuery($request), $request);
         return $this->contenter()->response($this->resolveView('content'));
+    }
+
+    public function statistics(Request $request): Response
+    {
+        $this->contenter()->handleRequest($this->getQuery($request), $request);
+        $this->contenter()->setCharts($this->getCharts());
+        return $this->contenter()->response(view('laravel-additions::statistics'));
     }
 
     protected function contenter(): ContenterInterface
@@ -163,5 +170,10 @@ trait ContenterController
 
         }
         return $routes;
+    }
+
+    protected function getCharts(): array
+    {
+        return [];
     }
 }

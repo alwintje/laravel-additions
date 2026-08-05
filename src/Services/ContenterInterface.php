@@ -6,6 +6,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Kroesen\LaravelAdditions\Models\Chart\ChartInterface;
 
 interface ContenterInterface
 {
@@ -21,6 +22,11 @@ interface ContenterInterface
     public function handleRequest(Builder $builder, Request $request): void;
 
     public function setBuilder(Builder $builder): void;
+
+    public function setCharts(null|array $charts = []);
+    public function addChart(ChartInterface $chart): void;
+    public function hasCharts(): bool;
+    public function isStatistics(): bool;
 
     public function applyFiltersToQuery(Builder $builder, array $fieldData = [], bool $save = false): void;
 

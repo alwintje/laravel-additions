@@ -1,5 +1,6 @@
 <div class="text-center" @if(isset($perPage)) style="position: relative;min-height: 60px;" @endif >
     {{ $results->links() }}
+    <div class="statistics-btn-container"></div>
     @if(isset($perPage))
     <div style="position: absolute;right:0;top: 0;">
         <label style="margin: 0;" for="per-page-select">{!! __('global.Rows_per_page') !!}</label><br />
