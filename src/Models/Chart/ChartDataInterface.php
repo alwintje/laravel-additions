@@ -22,6 +22,10 @@ interface ChartDataInterface
 
     public function setType(ChartFieldType $type): static;
 
+    // Most used ones
+    public static function count(string $name, string $field): static;
+    public static function sum(string $name, string $field): static;
+
     public function getType(): ChartFieldType;
 
     public function getGroupBy(): ?string;

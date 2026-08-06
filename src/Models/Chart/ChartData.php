@@ -12,7 +12,7 @@ class ChartData implements ChartDataInterface
 
     public function __construct(
         protected string $name,
-        protected string $field,
+        protected null|string|ChartFieldInterface $field = null,
         protected ChartFieldType $type = ChartFieldType::NONE,
         protected ?string $groupBy = null,
     ) {
@@ -20,8 +20,8 @@ class ChartData implements ChartDataInterface
 
     public static function make(
         string $name,
-        string $field,
-        ChartFieldType $type = ChartFieldType::NONE,
+        null|string|ChartFieldInterface $field = null,
+        ?ChartFieldType $type = ChartFieldType::NONE,
         ?string $groupBy = null,
     ): static {
         return new static($name, $field, $type, $groupBy);
@@ -46,6 +46,16 @@ class ChartData implements ChartDataInterface
     public function getType(): ChartFieldType
     {
         return $this->type;
+    }
+
+    public static function count(string $name, string $field): static
+    {
+        return static::make($name, $field, ChartFieldType::COUNT);
+    }
+
+    public static function sum(string $name, string $field): static
+    {
+        return static::make($name, $field, ChartFieldType::SUM);
     }
 
     public function getGroupBy(): ?string

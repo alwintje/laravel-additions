@@ -11,6 +11,14 @@ use Kroesen\LaravelAdditions\Enums\ChartFieldType;
 
 class Chart implements ChartInterface
 {
+    protected const TYPES = [
+        'bar',
+        'line',
+        'doughnut',
+        'pie',
+        'polarArea',
+        'radar',
+    ];
 
     private string           $id;
     private null|string      $title      = null;
@@ -27,7 +35,13 @@ class Chart implements ChartInterface
 
     public function __construct(string|View $view)
     {
-        $this->view($view);
+        if($view instanceof View){
+            $this->view($view);
+        }elseif(in_array($view, self::TYPES, true)){
+            $this->type($view);
+        }else{
+            $this->view($view);
+        }
         $this->id = Str::uuid()->toString();
     }
 
@@ -37,22 +51,51 @@ class Chart implements ChartInterface
         ?ChartDataInterface $labels = null,
         array               $datasets = [],
         string|array        $orderBy = [],
-    ): static
-    {
+    ): static {
         $self = new static($view);
 
         $self->title = $title;
         $self->labels = $labels;
-        if($labels->getType() === ChartFieldType::NONE){
+        if($labels !== null && $labels->getType() === ChartFieldType::NONE){
             $labels->setType(ChartFieldType::LABEL);
         }
         foreach ($datasets as $dataset) {
             $self->addDataset($dataset);
         }
 
-        $self->setOrderBy($orderBy);
+        $self->orderBy($orderBy);
 
         return $self;
+    }
+
+    public static function bar(?string $title = null): static
+    {
+        return static::make('bar', $title);
+    }
+
+    public static function line(?string $title = null): static
+    {
+        return static::make('line', $title);
+    }
+
+    public static function doughnut(?string $title = null): static
+    {
+        return static::make('doughnut', $title);
+    }
+
+    public static function pie(?string $title = null): static
+    {
+        return static::make('pie', $title);
+    }
+
+    public static function polarArea(?string $title = null): static
+    {
+        return static::make('polarArea', $title);
+    }
+
+    public static function radar(?string $title = null): static
+    {
+        return static::make('radar', $title);
     }
 
     public function id(string $id): static
@@ -61,25 +104,19 @@ class Chart implements ChartInterface
         return $this;
     }
 
+    public function type(string $type): static
+    {
+        $this->view(view(
+            'laravel-additions::components.chart.base',
+            ['type' => $type]
+        ));
+
+        return $this;
+    }
+
     public function view(View|string $view): static
     {
-        if(is_string($view)) {
-            $this->view = match ($view) {
-                'bar' => view('laravel-additions::components.chart.base', ['type' => 'bar']),
-                'line' => view('laravel-additions::components.chart.base', ['type' => 'line']),
-                'doughnut' => view('laravel-additions::components.chart.base', ['type' => 'doughnut']),
-                'pie' => view('laravel-additions::components.chart.base', ['type' => 'pie']),
-                'polarArea' => view('laravel-additions::components.chart.base', ['type' => 'polarArea']),
-                'radar' => view('laravel-additions::components.chart.base', ['type' => 'radar']),
-//                'mixed' => view('laravel-additions::components.chart.chart', ['type' => 'mixed']),
-//                'area' => view('laravel-additions::components.chart.chart', ['type' => 'area']),
-//                'bubble' => view('laravel-additions::components.chart.chart', ['type' => 'bubble']),
-//                'scatter' => view('laravel-additions::components.chart.chart', ['type' => 'scatter']),
-                default => view($view),
-            };
-        }else{
-            $this->view = $view;
-        }
+        $this->view = $view instanceof View ? $view : view($view);
         return $this;
     }
 
@@ -89,9 +126,10 @@ class Chart implements ChartInterface
         return $this;
     }
 
-    public function chartType(string $type = 'bar'): static
+    public function labels(ChartDataInterface $labels): static
     {
-        $this->chartType = $type;
+        $this->labels = $labels;
+        $labels->setType(ChartFieldType::LABEL);
         return $this;
     }
 
@@ -113,8 +151,11 @@ class Chart implements ChartInterface
         return $this;
     }
 
-    public function setOrderBy(array|string $orderBy): static
+    public function orderBy(array|string|ChartFieldInterface $orderBy): static
     {
+        if($orderBy instanceof ChartFieldInterface) {
+            $orderBy = $orderBy->order();
+        }
         if(is_string($orderBy)){
             $this->orderBy = [$orderBy => 'asc'];
         }else{
@@ -145,7 +186,10 @@ class Chart implements ChartInterface
         }
 
         foreach ($this->orderBy as $orderBy => $direction) {
+            $orderBy = $orderBy instanceof ChartFieldInterface ? $orderBy->order() : $orderBy;
+
             $query->orderBy(DB::raw($orderBy), $direction);
+            $query->groupBy(DB::raw($orderBy));
         }
 
         return $this->view->with([
