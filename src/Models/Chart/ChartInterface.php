@@ -27,7 +27,7 @@ interface ChartInterface
 
     public function removeDataset(string|ChartDataInterface $axis): static;
 
-    public function where(Closure $function): static;
+    public function modifyQuery(Closure $function): static;
 
     public function setOrderBy(array|string $orderBy): static;
 

@@ -22,7 +22,7 @@ class Chart implements ChartInterface
     private array            $datasets       = [];
 
 
-    private null|Closure     $where      = null;
+    private null|Closure     $modifyQuery      = null;
     private array            $orderBy    = [];
 
     public function __construct(string|View $view)
@@ -107,9 +107,9 @@ class Chart implements ChartInterface
         return $this;
     }
 
-    public function where(Closure $function): static
+    public function modifyQuery(Closure $function): static
     {
-        $this->where = $function;
+        $this->modifyQuery = $function;
         return $this;
     }
 
@@ -126,8 +126,13 @@ class Chart implements ChartInterface
     public function build(Builder $query): View
     {
         $query = clone $query;
-        $query->select([]);
-        $query->reorder();
+
+        // Clear query
+        $query
+            ->select([]) // Remove selects
+            ->setEagerLoads([]) // Remove relations
+            ->reorder() // Remove order
+        ;
 
         $this->labels->handleQuery($query);
 
@@ -135,8 +140,8 @@ class Chart implements ChartInterface
             $dataset->handleQuery($query);
         }
 
-        if(null !== $this->where) {
-            ($this->where)($query, $this);
+        if(null !== $this->modifyQuery) {
+            ($this->modifyQuery)($query, $this);
         }
 
         foreach ($this->orderBy as $orderBy => $direction) {
