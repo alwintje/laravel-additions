@@ -133,6 +133,12 @@ class Chart implements ChartInterface
         return $this;
     }
 
+    public function datasets(array $datasets): static
+    {
+        $this->datasets = $datasets;
+        return $this;
+    }
+
     public function addDataset(ChartDataInterface $dataset): static
     {
         $this->datasets[$dataset->getName()] = $dataset;

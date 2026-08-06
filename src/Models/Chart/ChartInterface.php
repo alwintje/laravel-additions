@@ -34,6 +34,8 @@ interface ChartInterface
 
     public function labels(ChartDataInterface $labels): static;
 
+    public function datasets(array $datasets): static;
+
     public function addDataset(ChartDataInterface $dataset): static;
 
     public function removeDataset(string|ChartDataInterface $axis): static;
