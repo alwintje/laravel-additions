@@ -95,23 +95,26 @@ class ContenterListData extends Model
     {
         $contenter = static::getContenter($key);
         if(null === $contenter) {
-
-            // Get old cookie data
+            // Get old cookie data, save the data and remove the cookie
             if(Cookie::has($key)) {
-
                 $cookie = Cookie::get($key, '{}');
                 try{
                     try {
-                        return json_decode($cookie, true);
+                        $data = json_decode($cookie, true);
+                        self::saveListData($key, $data);
+                        Cookie::forget($key);
+                        return $data;
                     }catch (\Throwable){
-                        $data = app(EncryptCookies::class)->decryptEncryptedCookie($key, $cookie);
-                        return json_decode($data, true);
+                        $cookieString = app(EncryptCookies::class)->decryptEncryptedCookie($key, $cookie);
+                        $data = json_decode($cookieString, true);
+                        self::saveListData($key, $data);
+                        Cookie::forget($key);
+                        return $data;
                     }
                 }catch (\Throwable){
                     return [];
                 }
             }
-
             return [];
         }
         if ($contenter->last_request === null ||
