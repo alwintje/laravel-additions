@@ -205,9 +205,11 @@ class Contenter implements ContenterInterface
                     }
                     $data['results'] = $results;
                 }
-            }else{
+            }elseif(isset($this->listData['perPage'])){
                 $data['results'] = $this->builder->paginate($this->listData['perPage']);
                 $data['results']->setPath('#');
+            }else{
+                $data['results'] = $this->builder->get();
             }
         }
         $data = array_merge($data, $view->getData());
