@@ -82,12 +82,31 @@ trait ContenterController
         $singular = $resource->implode('.');
         $plural = $pluralResource->implode('.');
 
-        return collect([
+        $data = [
             $singular,
             str_replace('_', '-', $singular),
             $plural,
             str_replace('_', '-', $plural),
-        ])->map(fn ($path) => $path . '.');
+        ];
+
+        if(str_starts_with($resource->last(), $resource->first()) && $resource->last() !== $resource->first()) {
+            $last = substr($resource->pop(), strlen($resource->first()));
+            if(str_starts_with($last, '-') || str_starts_with($last, '_')) {
+                $last = substr($last, 1);
+            }
+            $resource->add($last);
+
+            $pluralResource = $resource->map(fn ($part) => Str::plural($part));
+            $singular = $resource->implode('.');
+            $plural = $pluralResource->implode('.');
+
+            $data[] = $singular;
+            $data[] = str_replace('_', '-', $singular);
+            $data[] = $plural;
+            $data[] = str_replace('_', '-', $plural);
+        }
+
+        return collect($data)->map(fn ($path) => $path . '.');
     }
 
     private function resolveView(string $name): \Illuminate\View\View
